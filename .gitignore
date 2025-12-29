@@ -1,6 +1,8 @@
 # Node
 node_modules/
 .env
+server/src/uploads/
+
 
 # Logs
 npm-debug.log*
