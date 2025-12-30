@@ -3,7 +3,7 @@ SKILLS = {
         "python", "c", "c++", "java", "javascript"
     ],
     "frontend": [
-        "html", "css", "bootstrap", "react", "react js","tailwind css"
+        "html", "css", "bootstrap", "react js","tailwind css"
     ],
     "backend": [
         "node.js", "express", "mongodb", "mysql", "php"
