@@ -1,11 +1,6 @@
 from skill_extractor import extract_skills
 
 def extract_jd_skills(job_description):
+    # extract_skills now already returns a SET
     jd_skills = extract_skills(job_description)
-
-    # flatten dict → set
-    flat_skills = set()
-    for skills in jd_skills.values():
-        flat_skills.update(skills)
-
-    return flat_skills
+    return jd_skills

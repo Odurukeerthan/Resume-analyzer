@@ -2,10 +2,10 @@ import fitz
 import sys
 
 from skill_extractor import extract_skills
-from scorer import score_resume
 from job_matcher import match_resume_to_job
 from jd_skill_extractor import extract_jd_skills
 from final_matcher import final_job_fit_score
+from spacy_jd_keywords import extract_dynamic_jd_keywords
 
 
 def extract_text_from_pdf(pdf_path):
@@ -19,51 +19,47 @@ def extract_text_from_pdf(pdf_path):
 if __name__ == "__main__":
     pdf_path = sys.argv[1]
 
-    # ---- RESUME PROCESSING ----
+    # ---- RESUME ----
     resume_text = extract_text_from_pdf(pdf_path)
-    resume_skills_dict = extract_skills(resume_text)
-
-    resume_skills = set()
-    for skills in resume_skills_dict.values():
-        resume_skills.update(skills)
-
-    resume_score = score_resume(resume_skills_dict)
+    resume_skills = extract_skills(resume_text)
 
     # ---- JOB DESCRIPTION ----
-    job_description = """We are hiring a MERN Stack Developer with strong experience in building full-stack web applications.
-The ideal candidate should have hands-on experience with React.js for frontend development, Node.js and Express.js for backend development, and MongoDB for database management. You will be responsible for designing RESTful APIs, integrating frontend components with server-side logic, and ensuring application performance and scalability.
-Required skills include JavaScript (ES6+), HTML, CSS, React.js, Node.js, Express.js, MongoDB, and Git. Familiarity with backend architecture, API design, and database operations is essential.
-Knowledge of machine learning basics, Python programming, and experience working in collaborative development environments is a plus."""
-
+    job_description = """
+    We are hiring a MERN Stack Developer with strong experience in React.js,
+    Node.js, Express.js, MongoDB, REST APIs, JavaScript, HTML, CSS, and Git.
+    Knowledge of Python and machine learning is a plus.
+    """
 
     jd_skills = extract_jd_skills(job_description)
 
-    # ---- SKILL GAP ----
+    # ---- SKILL GAP (STATIC) ----
     matched_skills = resume_skills & jd_skills
     missing_skills = jd_skills - resume_skills
 
-    # ---- TF-IDF (SKILLS vs SKILLS) ----
-    resume_skill_text = " ".join(resume_skills)
-    jd_skill_text = " ".join(jd_skills)
+    # ---- TF-IDF (SKILLS ONLY) ----
+    tfidf_score = match_resume_to_job(
+        " ".join(resume_skills),
+        " ".join(jd_skills)
+    )
 
-    tfidf_score = match_resume_to_job(resume_skill_text, jd_skill_text)
-
-    # ---- FINAL SCORE ----
     final_score = final_job_fit_score(matched_skills, jd_skills, tfidf_score)
 
+    # ---- spaCy DYNAMIC KEYWORDS (JD ONLY) ----
+    dynamic_jd_keywords = extract_dynamic_jd_keywords(job_description)
+    dynamic_missing = dynamic_jd_keywords - resume_skills
+
     # ---- OUTPUT ----
-    print("\n====== RESUME SCORE ======")
-    print(f"General Resume Score: {resume_score}%")
+    print("\n====== FINAL JOB FIT SCORE ======")
+    print(f"{final_score}%")
 
-    print("\n====== JOB MATCHING ======")
-    print(f"TF-IDF Semantic Score: {tfidf_score}%")
-    print(f"Final Job Fit Score: {final_score}%")
-
-    print("\n====== SKILL ANALYSIS ======")
-    print("Matched Skills:")
+    print("\n====== MATCHED SKILLS ======")
     for s in matched_skills:
         print(" -", s)
 
-    print("\nMissing Skills:")
+    print("\n====== MISSING SKILLS (STATIC) ======")
     for s in missing_skills:
+        print(" -", s)
+
+    print("\n====== ADDITIONAL JD KEYWORDS (spaCy) ======")
+    for s in list(dynamic_missing)[:10]:
         print(" -", s)

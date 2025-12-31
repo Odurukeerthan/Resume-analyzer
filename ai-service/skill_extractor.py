@@ -1,16 +1,14 @@
-from skills import SKILLS
+from skills import SKILL_ALIASES
 from utils import clean_text
 
 def extract_skills(text):
     text = clean_text(text)
-    found_skills = {}
+    found_skills = set()
 
-    for category, skills in SKILLS.items():
-        matched = []
-        for skill in skills:
-            if skill in text:
-                matched.append(skill)
-        if matched:
-            found_skills[category] = matched
+    for canonical, aliases in SKILL_ALIASES.items():
+        for alias in aliases:
+            if alias in text:
+                found_skills.add(canonical)
+                break
 
     return found_skills
