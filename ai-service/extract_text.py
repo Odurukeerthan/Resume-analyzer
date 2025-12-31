@@ -1,10 +1,11 @@
-import fitz  # PyMuPDF
+import fitz
 import sys
 
-from job_matcher import match_resume_to_job
-from skill_gap import skill_gap_analysis
 from skill_extractor import extract_skills
 from scorer import score_resume
+from job_matcher import match_resume_to_job
+from jd_skill_extractor import extract_jd_skills
+from final_matcher import final_job_fit_score
 
 
 def extract_text_from_pdf(pdf_path):
@@ -16,46 +17,53 @@ def extract_text_from_pdf(pdf_path):
 
 
 if __name__ == "__main__":
-    # 1. Get PDF path
     pdf_path = sys.argv[1]
 
-    # 2. Extract raw text
-    extracted_text = extract_text_from_pdf(pdf_path)
+    # ---- RESUME PROCESSING ----
+    resume_text = extract_text_from_pdf(pdf_path)
+    resume_skills_dict = extract_skills(resume_text)
 
-    # 3. Extract skills using NLP logic
-    skills = extract_skills(extracted_text)
+    resume_skills = set()
+    for skills in resume_skills_dict.values():
+        resume_skills.update(skills)
 
-    # 4. Score resume
-    score = score_resume(skills)
+    resume_score = score_resume(resume_skills_dict)
 
-    # 5. Job description (Temporary hardcoded for demonstration)
-    job_description = """Looking for a MERN stack developer with experience in React, Node.js,
-    MongoDB, REST APIs, and basic machine learning knowledge."""
+    # ---- JOB DESCRIPTION ----
+    job_description = """We are hiring a MERN Stack Developer with strong experience in building full-stack web applications.
+The ideal candidate should have hands-on experience with React.js for frontend development, Node.js and Express.js for backend development, and MongoDB for database management. You will be responsible for designing RESTful APIs, integrating frontend components with server-side logic, and ensuring application performance and scalability.
+Required skills include JavaScript (ES6+), HTML, CSS, React.js, Node.js, Express.js, MongoDB, and Git. Familiarity with backend architecture, API design, and database operations is essential.
+Knowledge of machine learning basics, Python programming, and experience working in collaborative development environments is a plus."""
 
-    # 6. Match resume to job
-    job_match_score = match_resume_to_job(extracted_text, job_description)
 
-    # 7. Skill gap analysis
-    gap = skill_gap_analysis(extracted_text, job_description)
+    jd_skills = extract_jd_skills(job_description)
 
-    # 8. Output results
-    print("\n====== EXTRACTED TEXT (PREVIEW) ======\n")
-    print(extracted_text[:800])  # preview only
+    # ---- SKILL GAP ----
+    matched_skills = resume_skills & jd_skills
+    missing_skills = jd_skills - resume_skills
 
-    print("\n====== EXTRACTED SKILLS ======\n")
-    for category, values in skills.items():
-        print(f"{category}: {values}")
+    # ---- TF-IDF (SKILLS vs SKILLS) ----
+    resume_skill_text = " ".join(resume_skills)
+    jd_skill_text = " ".join(jd_skills)
 
-    print("\n====== RESUME SCORE ======\n")
-    print(f"General Resume Score: {score}%")
+    tfidf_score = match_resume_to_job(resume_skill_text, jd_skill_text)
 
-    print("\n====== JOB MATCH SCORE ======\n")
-    print(f"Job Match Score: {job_match_score}%")
+    # ---- FINAL SCORE ----
+    final_score = final_job_fit_score(matched_skills, jd_skills, tfidf_score)
 
-    print("\n====== SKILL GAP ANALYSIS ======\n")
+    # ---- OUTPUT ----
+    print("\n====== RESUME SCORE ======")
+    print(f"General Resume Score: {resume_score}%")
+
+    print("\n====== JOB MATCHING ======")
+    print(f"TF-IDF Semantic Score: {tfidf_score}%")
+    print(f"Final Job Fit Score: {final_score}%")
+
+    print("\n====== SKILL ANALYSIS ======")
     print("Matched Skills:")
-    for skill in gap["matched_skills"]:
-        print(f"  - {skill}")
-    print("Missing Skills:")
-    for skill in gap["missing_skills"]:
-        print(f"  - {skill}")
+    for s in matched_skills:
+        print(" -", s)
+
+    print("\nMissing Skills:")
+    for s in missing_skills:
+        print(" -", s)
