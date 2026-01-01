@@ -6,6 +6,7 @@ from job_matcher import match_resume_to_job
 from jd_skill_extractor import extract_jd_skills
 from final_matcher import final_job_fit_score
 from spacy_jd_keywords import extract_dynamic_jd_keywords
+from llm_client import generate_ai_suggestions
 
 
 def extract_text_from_pdf(pdf_path):
@@ -43,10 +44,20 @@ if __name__ == "__main__":
     )
 
     final_score = final_job_fit_score(matched_skills, jd_skills, tfidf_score)
+    
 
     # ---- spaCy DYNAMIC KEYWORDS (JD ONLY) ----
     dynamic_jd_keywords = extract_dynamic_jd_keywords(job_description)
     dynamic_missing = dynamic_jd_keywords - resume_skills
+
+    # ---- SUGGESTIONS ----
+    job_role = "MERN Stack Developer"
+
+    ai_suggestions = generate_ai_suggestions(
+        job_role=job_role,
+        final_score=final_score,
+        missing_skills=missing_skills
+    )
 
     # ---- OUTPUT ----
     print("\n====== FINAL JOB FIT SCORE ======")
@@ -59,7 +70,5 @@ if __name__ == "__main__":
     print("\n====== MISSING SKILLS (STATIC) ======")
     for s in missing_skills:
         print(" -", s)
-
-    print("\n====== ADDITIONAL JD KEYWORDS (spaCy) ======")
-    for s in list(dynamic_missing)[:10]:
-        print(" -", s)
+    print("\n====== AI CAREER SUGGESTIONS (Gemini) ======\n")
+    print(ai_suggestions)
