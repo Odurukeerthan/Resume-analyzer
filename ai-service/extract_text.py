@@ -1,12 +1,12 @@
 import fitz
 import sys
+import json
 
 from skill_extractor import extract_skills
 from job_matcher import match_resume_to_job
 from jd_skill_extractor import extract_jd_skills
 from final_matcher import final_job_fit_score
 from spacy_jd_keywords import extract_dynamic_jd_keywords
-from llm_client import generate_ai_suggestions
 
 
 def extract_text_from_pdf(pdf_path):
@@ -24,7 +24,8 @@ if __name__ == "__main__":
     resume_text = extract_text_from_pdf(pdf_path)
     resume_skills = extract_skills(resume_text)
 
-    # ---- JOB DESCRIPTION ----
+    # ---- JOB DESCRIPTION (TEMP – backend will send later) ----
+    job_role = "MERN Stack Developer"
     job_description = """
     We are hiring a MERN Stack Developer with strong experience in React.js,
     Node.js, Express.js, MongoDB, REST APIs, JavaScript, HTML, CSS, and Git.
@@ -44,31 +45,18 @@ if __name__ == "__main__":
     )
 
     final_score = final_job_fit_score(matched_skills, jd_skills, tfidf_score)
-    
 
-    # ---- spaCy DYNAMIC KEYWORDS (JD ONLY) ----
+    # ---- OPTIONAL spaCy JD KEYWORDS (backend may use later) ----
     dynamic_jd_keywords = extract_dynamic_jd_keywords(job_description)
     dynamic_missing = dynamic_jd_keywords - resume_skills
 
-    # ---- SUGGESTIONS ----
-    job_role = "MERN Stack Developer"
+    # ---- FINAL JSON OUTPUT (ONLY OUTPUT) ----
+    result = {
+        "jobRole": job_role,
+        "finalScore": round(final_score, 2),
+        "matchedSkills": sorted(list(matched_skills)),
+        "missingSkills": sorted(list(missing_skills)),
+        "dynamicMissingKeywords": sorted(list(dynamic_missing))
+    }
 
-    ai_suggestions = generate_ai_suggestions(
-        job_role=job_role,
-        final_score=final_score,
-        missing_skills=missing_skills
-    )
-
-    # ---- OUTPUT ----
-    print("\n====== FINAL JOB FIT SCORE ======")
-    print(f"{final_score}%")
-
-    print("\n====== MATCHED SKILLS ======")
-    for s in matched_skills:
-        print(" -", s)
-
-    print("\n====== MISSING SKILLS (STATIC) ======")
-    for s in missing_skills:
-        print(" -", s)
-    print("\n====== AI CAREER SUGGESTIONS (Gemini) ======\n")
-    print(ai_suggestions)
+    print(json.dumps(result))
