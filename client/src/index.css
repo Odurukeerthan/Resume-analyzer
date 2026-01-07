@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bgDark: #0b0f1a;
+  --color-cardDark: #111827;
+
+  --color-neonBlue: #38bdf8;
+  --color-neonCyan: #22d3ee;
+  --color-neonPurple: #a855f7;
+}
