@@ -8,3 +8,33 @@
   --color-neonCyan: #22d3ee;
   --color-neonPurple: #a855f7;
 }
+
+@layer utilities {
+  .input {
+    @apply text-white  w-full p-2 rounded bg-bgDark border border-gray-700 focus:border-neonBlue outline-none;
+  }
+
+  .btn-primary {
+    @apply w-full bg-neonBlue text-black py-2 rounded hover:bg-neonCyan transition;
+  }
+
+  .switch {
+    @apply text-center text-sm mt-4 cursor-pointer text-neonBlue;
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .transform-style-preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+}

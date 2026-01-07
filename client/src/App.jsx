@@ -1,12 +1,9 @@
 import './index.css'
+import Auth from './pages/Auth.jsx'
+
 function App() {
   return (
-   <div className="min-h-screen bg-bgDark flex items-center justify-center">
-  <h1 className="text-neonBlue text-3xl font-bold">
-    Tailwind Custom Colors Working
-  </h1>
-</div>
-
+    <Auth />
   );
 }
 
