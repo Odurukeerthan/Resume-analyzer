@@ -1,34 +1,34 @@
-import ResumeForm from "../components/ResumeForm";
-import ScoreRing from "../components/ScoreRing";
-import ResumeCard from "../components/ResumeCard";
+import Sidebar from "../components/layout/Sidebar";
+import UploadCard from "../components/dashboard/UploadCard";
+import LiveScoreCard from "../components/dashboard/LiveScoreCard";
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-bgDark text-gray-200 p-6">
-      <h1 className="text-3xl font-semibold mb-6 text-neonBlue">
-        Resume Analyzer Dashboard
-      </h1>
+    <div className="min-h-screen bg-bgDark flex text-gray-200">
+      {/* Sidebar */}
+      <Sidebar />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Form */}
-        <div className="lg:col-span-2 bg-cardDark p-6 rounded-xl border border-neonBlue/20">
-          <ResumeForm />
+      {/* Main */}
+      <main className="flex-1 p-6 space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center border-b border-gray-800 pb-4">
+          <div>
+            <h1 className="text-2xl font-semibold">Dashboard</h1>
+            <p className="text-xs text-green-400 mt-1 font-mono">
+              <span className="text-gray-500 font-mono font-bold">SYSTEM_STATUS:</span> ONLINE
+            </p>
+          </div>
+
+          <button className="btn-primary px-2 py-2 text-sm w-fit shadow-cyan-500/10">+ New Scan</button>
+
         </div>
 
-        {/* Score */}
-        <div className="bg-cardDark p-6 rounded-xl border border-neonPurple/20 flex items-center justify-center">
-          <ScoreRing score={25} />
+        {/* Main Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <UploadCard />
+          <LiveScoreCard />
         </div>
-      </div>
-
-      {/* History */}
-      <div className="mt-8">
-        <h2 className="text-xl mb-4">Previous Uploads</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <ResumeCard name="Resume_2024.pdf" score={50} />
-          <ResumeCard name="Internship.pdf" score={74} />
-        </div>
-      </div>
+      </main>
     </div>
   );
 }

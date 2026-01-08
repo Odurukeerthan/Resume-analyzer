@@ -5,7 +5,7 @@
   --color-cardDark: #111827;
 
   --color-neonBlue: #38bdf8;
-  --color-neonCyan: #22d3ee;
+  --color-neonCyan: #2abdde;
   --color-neonPurple: #a855f7;
 }
 
@@ -15,7 +15,7 @@
   }
 
   .btn-primary {
-    @apply w-full bg-neonBlue text-black py-2 rounded hover:bg-neonCyan transition;
+    @apply min-w-10 bg-neonBlue text-black py-2 rounded hover:bg-neonCyan transition;
   }
 
   .switch {

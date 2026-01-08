@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
 function getScoreColor(score) {
-  if (score <= 30) return "#ef4444"; // red
-  if (score <= 50) return "#f97316"; // orange
-  if (score <= 65) return "#eab308"; // yellow
-  if (score <= 80) return "#22c55e"; // green
-  if (score <= 90) return "#38bdf8"; // blue
+  if (score <= 25) return "#ef4444"; // red
+  if (score <= 40) return "#f97316"; // orange
+  if (score <= 55) return "#eab308"; // yellow
+  if (score <= 70) return "#22c55e"; // green
+  if (score <= 85) return "#38bdf8"; // blue
   return "#a855f7"; // violet
 }
 
