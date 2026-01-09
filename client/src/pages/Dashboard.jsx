@@ -9,9 +9,9 @@ export default function Dashboard() {
       <Sidebar />
 
       {/* Main */}
-      <main className="flex-1 p-6 space-y-6">
+      <main className="flex-1 p-6 space-y-6 top-0">
         {/* Header */}
-        <div className="flex justify-between items-center border-b border-gray-800 pb-4">
+        <div className="flex justify-between items-center border border-cardStroke pb-4 bg-cardDark ">
           <div>
             <h1 className="text-2xl font-semibold">Dashboard</h1>
             <p className="text-xs text-green-400 mt-1 font-mono">
