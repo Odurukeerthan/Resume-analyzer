@@ -1,0 +1,16 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 16.6667V18.3333" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M10 1.66666V3.33332" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M14.1667 16.6667V18.3333" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M14.1667 1.66666V3.33332" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1.66666 10H3.33332" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1.66666 14.1667H3.33332" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1.66666 5.83334H3.33332" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16.6667 10H18.3333" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16.6667 14.1667H18.3333" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16.6667 5.83334H18.3333" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5.83334 16.6667V18.3333" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5.83334 1.66666V3.33332" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5.00001 3.33334H15C15.9205 3.33334 16.6667 4.07954 16.6667 5.00001V15C16.6667 15.9205 15.9205 16.6667 15 16.6667H5.00001C4.07954 16.6667 3.33334 15.9205 3.33334 15V5.00001C3.33334 4.07954 4.07954 3.33334 5.00001 3.33334V3.33334" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M7.49999 6.66666H12.5C12.9602 6.66666 13.3333 7.03975 13.3333 7.49999V12.5C13.3333 12.9602 12.9602 13.3333 12.5 13.3333H7.49999C7.03975 13.3333 6.66666 12.9602 6.66666 12.5V7.49999C6.66666 7.03975 7.03975 6.66666 7.49999 6.66666V6.66666" stroke="black" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
