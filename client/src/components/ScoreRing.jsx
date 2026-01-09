@@ -10,14 +10,14 @@ function getScoreColor(score) {
 }
 
 export default function ScoreRing({ score, size = 160 }) {
-  const radius = 60;
+  const radius = size / 2 - 10;
   const circumference = 2 * Math.PI * radius;
   const [offset, setOffset] = useState(circumference);
 
   useEffect(() => {
     const progress = ((100 - score) / 100) * circumference;
     setOffset(progress);
-  }, [score]);
+  }, [score, circumference]);
 
   const color = getScoreColor(score);
 
@@ -29,7 +29,7 @@ export default function ScoreRing({ score, size = 160 }) {
           cy={size / 2}
           r={radius}
           stroke="#1f2937"
-          strokeWidth="10"
+          strokeWidth="11"
           fill="none"
         />
         <circle
@@ -37,18 +37,19 @@ export default function ScoreRing({ score, size = 160 }) {
           cy={size / 2}
           r={radius}
           stroke={color}
-          strokeWidth="10"
+          strokeWidth="11"
           fill="none"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          strokeLinecap="round"
+          strokeLinecap="butt"
+          style={{ filter: `drop-shadow(0 0 8px ${color})` }}
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
           className="transition-all duration-1000"
         />
       </svg>
 
       <div
-        className="absolute inset-0 flex items-center justify-center text-2xl font-bold"
+        className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-white"
         style={{ color }}
       >
         {score}%
