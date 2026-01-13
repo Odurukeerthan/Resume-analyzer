@@ -42,7 +42,6 @@ export default function ScoreRing({ score, size = 160 }) {
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="butt"
-          style={{ filter: `drop-shadow(0 0 8px ${color})` }}
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
           className="transition-all duration-1000"
         />

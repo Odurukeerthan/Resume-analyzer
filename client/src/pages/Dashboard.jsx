@@ -1,34 +1,20 @@
-import Sidebar from "../components/layout/Sidebar";
 import UploadCard from "../components/dashboard/UploadCard";
 import LiveScoreCard from "../components/dashboard/LiveScoreCard";
-
+import Header from "../components/header/Header.jsx"
 export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-bgDark flex text-gray-200">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="min-h-screen bg-bgDark text-gray-200">
 
-      {/* Main */}
-      <main className="flex-1 p-6 space-y-6 top-0">
-        {/* Header */}
-        <div className="flex justify-between items-center border border-cardStroke pb-4 bg-cardDark ">
-          <div>
-            <h1 className="text-2xl font-semibold">Dashboard</h1>
-            <p className="text-xs text-green-400 mt-1 font-mono">
-              <span className="text-gray-500 font-mono font-bold">SYSTEM_STATUS:</span> ONLINE
-            </p>
-          </div>
-
-          <button className="btn-primary px-2 py-2 text-sm w-fit shadow-cyan-500/10">+ New Scan</button>
-
-        </div>
-
-        {/* Main Cards */}
+      {/* HEADER */}
+      <Header/>
+      {/* MAIN CONTENT */}
+      <main className="p-6 space-y-6 md:mx-20 lg:mx-15 xl:mx-25 2xl:mx-32">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <UploadCard />
           <LiveScoreCard />
         </div>
       </main>
+
     </div>
   );
 }
