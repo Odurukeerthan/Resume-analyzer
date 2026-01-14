@@ -7,7 +7,7 @@ export default function SkillSpiderCard() {
   const outerRadius = 80;
 
   return (
-    <div className="bg-cardDark border border-cardStroke rounded-xl p-6 w-full max-w-125">
+    <div className="bg-cardDark border border-cardStroke rounded-xl p-6 w-full h-full">
       {/* HEADER SECTION */}
       <div className="flex items-center gap-2 mb-6">
         <img src={SkillGapAnalysis} alt="Skill Gap Analysis" className="w-6 h-6" />
@@ -15,13 +15,13 @@ export default function SkillSpiderCard() {
       </div>
 
       {/* LEGEND */}
-      <div className="flex items-center gap-4 mb-4 text-[10px] uppercase tracking-wider font-mono">
+      <div className="flex items-center gap-4 mb-4 uppercase tracking-wider font-mono">
         <span className="flex items-center gap-1.5 text-neonCyan">
-          <span className="w-3 h-3 border border-neonCyan bg-neonCyan/20" />
+          <span className="w-5 h-3 border border-neonCyan bg-neonCyan/20" />
           Your Profile
         </span>
         <span className="flex items-center gap-1.5 text-neonPurple">
-          <span className="w-3 h-3 border border-neonPurple bg-neonPurple/20" />
+          <span className="w-5 h-3 border border-neonPurple bg-neonPurple/20" />
           Job Requirement
         </span>
       </div>
