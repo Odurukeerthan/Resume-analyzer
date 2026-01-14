@@ -1,12 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-bgDark: #0b0f1a;
-  --color-cardDark: #111827;
+  --color-bgDark: #020617;
+  --color-cardDark: rgba(15,23,42,0.6); 
+  --color-cardStroke: rgba(255,255,255,0.05);
 
   --color-neonBlue: #38bdf8;
-  --color-neonCyan: #2abdde;
+  --color-neonCyan: #06b6d4;
   --color-neonPurple: #a855f7;
+
+  --font-sans: 'Inter', sans-serif;
 }
 
 @layer utilities {

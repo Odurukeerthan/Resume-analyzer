@@ -3,6 +3,7 @@ import LiveScoreCard from "../components/dashboard/LiveScoreCard";
 import Header from "../components/header/Header.jsx";
 import SkillSpiderCard from "../components/dashboard/SkillSpiderCard.jsx";
 import ScoreHistoryCard from "../components/dashboard/ScoreHistoryCard.jsx";
+import RecentScans from "../components/dashboard/RecentScans.jsx";
 
 export default function Dashboard() {
   return (
@@ -21,6 +22,7 @@ export default function Dashboard() {
           <SkillSpiderCard />
           <ScoreHistoryCard />
         </div>
+        <RecentScans />
       </main>
     </div>
   );
