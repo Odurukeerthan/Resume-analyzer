@@ -1,4 +1,5 @@
 import { FileText, Plus } from "lucide-react";
+import { useState } from "react";
 
 /* DUMMY DATA (replace later with API) */
 const scans = [
@@ -7,18 +8,21 @@ const scans = [
     name: "Software_Eng_V2.pdf",
     score: 88,
     time: "Scanned 2 hours ago",
+    url: "/dummy/Software_Eng_V2.pdf",
   },
   {
     id: 2,
     name: "Frontend_Dev_Final.pdf",
     score: 72,
     time: "Scanned yesterday",
+    url: "/dummy/Frontend_Dev_Final.pdf",
   },
   {
     id: 3,
     name: "Resume_Draft_1.docx",
     score: 45,
     time: "Scanned 3 days ago",
+    url: "/dummy/Resume_Draft_1.docx",
   },
 ];
 
@@ -31,15 +35,20 @@ const getScoreStyle = (score) =>
     : "bg-red-500/10 text-red-400 border-red-400/30";
 
 export default function RecentScans() {
+  const [previewUrl, setPreviewUrl] = useState(null);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
       
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Recent Scans</h3>
-        <button className="text-sm text-neonCyan hover:underline flex items-center gap-1">
+        <a
+          href="/scans"
+          className="text-sm text-neonCyan hover:underline"
+        >
           View All →
-        </button>
+        </a>
       </div>
 
       {/* CARDS */}
@@ -48,6 +57,8 @@ export default function RecentScans() {
         {scans.map((scan) => (
           <div
             key={scan.id}
+            onMouseEnter={() => setPreviewUrl(scan.url)}
+            onMouseLeave={() => setPreviewUrl(null)}
             className="relative bg-cardDark border border-cardStroke rounded-xl p-4
                        hover:border-neonCyan/40 transition group"
           >
@@ -68,7 +79,9 @@ export default function RecentScans() {
 
             {/* FILE NAME */}
             <a
-              href="#"
+              href={scan.url}
+              target="_blank"
+              rel="noreferrer"
               className="block mt-4 font-medium truncate
                          group-hover:text-neonCyan transition"
             >
@@ -96,6 +109,19 @@ export default function RecentScans() {
         </div>
 
       </div>
+
+      {/* HOVER PREVIEW */}
+      {previewUrl && (
+        <div className="fixed right-6 bottom-6 z-50 w-48 h-64
+                        bg-black border border-cardStroke rounded-lg
+                        overflow-hidden shadow-xl">
+          <iframe
+            src={previewUrl}
+            title="Preview"
+            className="w-full h-full"
+          />
+        </div>
+      )}
     </div>
   );
 }
