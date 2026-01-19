@@ -2,6 +2,8 @@ import fitz
 import sys
 import json
 
+from section_detector import extract_sections
+from spider_metrics import compute_spider_metrics
 from skill_extractor import extract_skills
 from job_matcher import match_resume_to_job
 from jd_skill_extractor import extract_jd_skills
@@ -23,6 +25,9 @@ if __name__ == "__main__":
     # ---- RESUME ----
     resume_text = extract_text_from_pdf(pdf_path)
     resume_skills = extract_skills(resume_text)
+
+    # ---- SECTIONS (for formatting & communication) ----
+    sections_present = extract_sections(resume_text)
 
     # ---- JOB DESCRIPTION (TEMP – backend will send later) ----
     job_role = "MERN Stack Developer"
@@ -46,17 +51,42 @@ if __name__ == "__main__":
 
     final_score = final_job_fit_score(matched_skills, jd_skills, tfidf_score)
 
-    # ---- OPTIONAL spaCy JD KEYWORDS (backend may use later) ----
+    # ---- OPTIONAL spaCy JD KEYWORDS ----
     dynamic_jd_keywords = extract_dynamic_jd_keywords(job_description)
     dynamic_missing = dynamic_jd_keywords - resume_skills
 
-    # ---- FINAL JSON OUTPUT (ONLY OUTPUT) ----
+    # ---- SPIDER METRICS ----
+    spider_resume = compute_spider_metrics(resume_text, sections_present)
+    spider_job = compute_spider_metrics(
+        job_description.lower(),
+        extract_sections(job_description)
+    )
+
+    # ---- LIVE SCORE METRICS ----
+    keywords_score = round(
+        (len(matched_skills) / max(len(jd_skills), 1)) * 100
+    )
+
+    formatting_score = round(
+        (sum(sections_present.values()) / len(sections_present)) * 100
+    )
+
+    # ---- FINAL JSON OUTPUT ----
     result = {
         "jobRole": job_role,
         "finalScore": round(final_score, 2),
         "matchedSkills": sorted(list(matched_skills)),
         "missingSkills": sorted(list(missing_skills)),
-        "dynamicMissingKeywords": sorted(list(dynamic_missing))
+        "dynamicMissingKeywords": sorted(list(dynamic_missing)),
+        "spider": {
+            "resume": spider_resume,
+            "job": spider_job
+        },
+        "live_scores": {
+            "overall": round(final_score),
+            "keywords": keywords_score,
+            "formatting": formatting_score
+        }
     }
 
     print(json.dumps(result))
