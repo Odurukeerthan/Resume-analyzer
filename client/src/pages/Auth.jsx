@@ -10,8 +10,12 @@ export default function Auth() {
     email: "",
     password: "",
   });
+
   const [error, setError] = useState("");
+  const [info, setInfo] = useState(""); // ✅ info message
   const [loading, setLoading] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false); // ✅ resend flag
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,8 +25,9 @@ export default function Auth() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setInfo("");
 
-    // 🔍 ZOD VALIDATION (INSERT HERE)
+    // ✅ ZOD VALIDATION
     const result = isLogin
       ? loginSchema.safeParse({
           email: form.email,
@@ -32,29 +37,46 @@ export default function Auth() {
 
     if (!result.success) {
       setError(result.error.issues[0].message);
-      return; // ⛔ stop submission
+      return;
     }
 
     setLoading(true);
 
     try {
-      const data = isLogin
-        ? await loginUser({
-            email: form.email,
-            password: form.password,
-          })
-        : await registerUser({
-            name: form.name,
-            email: form.email,
-            password: form.password,
-          });
+      if (isLogin) {
+        // 🔐 LOGIN
+        const data = await loginUser({
+          email: form.email,
+          password: form.password,
+        });
 
-      localStorage.setItem("token", data.token);
-      navigate("/dashboard");
+        localStorage.setItem("token", data.token);
+        navigate("/dashboard");
+      } else {
+        // 📨 REGISTER
+        const data = await registerUser(form);
+
+        setInfo(data.message || "Check your email to verify your account.");
+        setNeedsVerification(true); // ✅ enable resend
+      }
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const resendVerification = async () => {
+    try {
+      await fetch("http://localhost:5000/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email }),
+      });
+
+      setInfo("Verification email resent successfully");
+    } catch {
+      setError("Failed to resend verification email");
     }
   };
 
@@ -134,6 +156,7 @@ export default function Auth() {
             />
 
             {error && <p className="text-red-400 text-sm">{error}</p>}
+            {info && <p className="text-green-400 text-sm">{info}</p>}
 
             <button
               disabled={loading}
@@ -143,6 +166,17 @@ export default function Auth() {
             >
               {loading ? "Processing..." : isLogin ? "Sign In" : "Get Started"}
             </button>
+
+            {/* 🔁 RESEND VERIFICATION */}
+            {!isLogin && needsVerification && (
+              <button
+                type="button"
+                onClick={resendVerification}
+                className="text-xs text-neonCyan hover:underline block mx-auto"
+              >
+                Resend verification email
+              </button>
+            )}
           </form>
 
           <div className="mt-8 pt-6 border-t border-white/5 flex justify-center">

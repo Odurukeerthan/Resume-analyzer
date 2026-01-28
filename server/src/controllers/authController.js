@@ -1,7 +1,11 @@
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import User from "../models/User.js";
 import { registerUserService } from "../services/authService.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
+/* REGISTER */
 export const registerUser = async (req, res) => {
   try {
     await registerUserService(req.body);
@@ -14,6 +18,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
+/* VERIFY EMAIL */
 export const verifyEmail = async (req, res) => {
   const { token } = req.params;
 
@@ -34,6 +39,35 @@ export const verifyEmail = async (req, res) => {
   res.json({ message: "Email verified successfully" });
 };
 
+/* RESEND VERIFICATION */
+export const resendVerification = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  if (user.isVerified) {
+    return res.status(400).json({ message: "Email already verified" });
+  }
+
+  const token = crypto.randomBytes(32).toString("hex");
+
+  user.emailVerifyToken = token;
+  user.emailVerifyExpiry = Date.now() + 60 * 60 * 1000;
+  await user.save();
+
+  const link = `${process.env.CLIENT_URL}/verify-email/${token}`;
+
+  await sendEmail({
+    to: user.email,
+    subject: "Verify your Resume.AI account",
+    html: `<p>Click to verify:</p><a href="${link}">Verify Email</a>`,
+  });
+
+  res.json({ message: "Verification email resent" });
+};
+
+/* LOGIN */
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
