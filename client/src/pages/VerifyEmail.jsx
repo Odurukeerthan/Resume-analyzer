@@ -18,9 +18,17 @@ export default function VerifyEmail() {
 
         if (!res.ok) throw new Error(data.message);
 
-        setStatus("success");
-        setMessage("Email verified successfully!");
-        setTimeout(() => navigate("/login"), 2000);
+        // Auto-login: Store token and redirect to dashboard
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+          setStatus("success");
+          setMessage("Email verified successfully! Redirecting to dashboard...");
+          setTimeout(() => navigate("/dashboard"), 1500);
+        } else {
+          setStatus("success");
+          setMessage("Email verified successfully!");
+          setTimeout(() => navigate("/"), 2000);
+        }
       } catch (err) {
         setStatus("error");
         setMessage(err.message || "Verification failed");

@@ -36,7 +36,15 @@ export const verifyEmail = async (req, res) => {
   user.emailVerifyExpiry = undefined;
   await user.save();
 
-  res.json({ message: "Email verified successfully" });
+  // Generate JWT token for auto-login
+  const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+
+  res.json({ 
+    message: "Email verified successfully",
+    token: jwtToken 
+  });
 };
 
 /* RESEND VERIFICATION */
