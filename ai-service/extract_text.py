@@ -21,6 +21,8 @@ def extract_text_from_pdf(pdf_path):
 
 if __name__ == "__main__":
     pdf_path = sys.argv[1]
+    job_role = sys.argv[2] if len(sys.argv) > 2 else "Software Developer"
+    job_description = sys.argv[3] if len(sys.argv) > 3 else ""
 
     # ---- RESUME ----
     resume_text = extract_text_from_pdf(pdf_path)
@@ -29,13 +31,9 @@ if __name__ == "__main__":
     # ---- SECTIONS (for formatting & communication) ----
     sections_present = extract_sections(resume_text)
 
-    # ---- JOB DESCRIPTION (TEMP – backend will send later) ----
-    job_role = "MERN Stack Developer"
-    job_description = """
-    We are hiring a MERN Stack Developer with strong experience in React.js,
-    Node.js, Express.js, MongoDB, REST APIs, JavaScript, HTML, CSS, and Git.
-    Knowledge of Python and machine learning is a plus.
-    """
+    # ---- JOB DESCRIPTION (from backend) ----
+    if not job_description:
+        job_description = f"Job role: {job_role}"
 
     jd_skills = extract_jd_skills(job_description)
 
@@ -52,8 +50,14 @@ if __name__ == "__main__":
     final_score = final_job_fit_score(matched_skills, jd_skills, tfidf_score)
 
     # ---- OPTIONAL spaCy JD KEYWORDS ----
-    dynamic_jd_keywords = extract_dynamic_jd_keywords(job_description)
-    dynamic_missing = dynamic_jd_keywords - resume_skills
+    dynamic_jd_keywords = set()
+    dynamic_missing = set()
+    try:
+        dynamic_jd_keywords = extract_dynamic_jd_keywords(job_description)
+        dynamic_missing = dynamic_jd_keywords - resume_skills
+    except Exception as e:
+        print(f"Warning: spaCy keyword extraction failed: {e}", file=sys.stderr)
+        # Continue without dynamic keywords
 
     # ---- SPIDER METRICS ----
     spider_resume = compute_spider_metrics(resume_text, sections_present)
