@@ -1,19 +1,55 @@
 import { spawn } from "child_process";
+import path from "path";
+import { fileURLToPath } from "url";
 import { genAI } from "../utils/geminiClient.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const analyzeResume = async (req, res) => {
   try {
     const { resumePath, jobRole, jobDescription } = req.body;
 
-    // 1️⃣ Run Python AI (explicit venv python)
-    const python = spawn(
-  "../ai-service/venv/Scripts/python.exe",
-  ["extract_text.py", resumePath],
-  {
-    cwd: "../ai-service", // ⭐ CRITICAL FIX
-  }
-);
+    if (!resumePath) {
+      return res.status(400).json({ error: "Resume path is required" });
+    }
 
+    // Resolve paths relative to project root
+    // __dirname is server/src/controllers, so go up 3 levels to project root
+    const projectRoot = path.resolve(__dirname, "../../..");
+    const aiServicePath = path.resolve(projectRoot, "ai-service");
+    const pythonExe = path.resolve(aiServicePath, "venv/Scripts/python.exe");
+    const scriptPath = path.resolve(aiServicePath, "extract_text.py");
+    
+    console.log("Python executable path:", pythonExe);
+    console.log("Script path:", scriptPath);
+    console.log("Working directory:", aiServicePath);
+
+    // 1️⃣ Run Python AI (explicit venv python)
+    // Pass jobRole and jobDescription as command-line arguments
+    const python = spawn(
+      pythonExe,
+      [
+        scriptPath,
+        resumePath,
+        jobRole || "Software Developer",
+        jobDescription || "",
+      ],
+      {
+        cwd: aiServicePath,
+      }
+    );
+
+    // Handle spawn errors
+    python.on("error", (err) => {
+      console.error("Failed to start Python process:", err);
+      console.error("Python path:", pythonExe);
+      console.error("Script path:", scriptPath);
+      return res.status(500).json({ 
+        error: "Failed to start AI service",
+        details: err.message 
+      });
+    });
 
     let output = "";
 
@@ -25,7 +61,8 @@ export const analyzeResume = async (req, res) => {
       console.error("Python error:", err.toString());
     });
 
-    python.on("close", async () => {
+    python.on("close", async (code) => {
+      console.log(`Python process exited with code ${code}`);
       if (!output) {
         return res.status(500).json({ error: "No output from AI service" });
       }
