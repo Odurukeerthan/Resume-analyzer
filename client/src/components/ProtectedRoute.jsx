@@ -11,7 +11,7 @@ export default function ProtectedRoute({ children }) {
       return;
     }
 
-    // Optionally validate token with backend
+    // Validate token with backend
     const validateToken = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/users/profile", {
@@ -27,8 +27,10 @@ export default function ProtectedRoute({ children }) {
           setIsValid(false);
         }
       } catch (error) {
-        localStorage.removeItem("token");
-        setIsValid(false);
+        console.error("Token validation error:", error);
+        // On network error, allow access but log the error
+        // This prevents blank page if backend is down
+        setIsValid(true);
       }
     };
 
@@ -39,7 +41,7 @@ export default function ProtectedRoute({ children }) {
     // Show loading state while validating
     return (
       <div className="min-h-screen bg-bgDark flex items-center justify-center">
-        <div className="text-neonCyan">Loading...</div>
+        <div className="text-neonCyan font-mono">Loading...</div>
       </div>
     );
   }

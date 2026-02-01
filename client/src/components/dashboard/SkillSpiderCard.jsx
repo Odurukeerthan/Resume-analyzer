@@ -1,10 +1,67 @@
 import SkillGapAnalysis from "../../assets/skill-gap.svg";
+import { useAnalysis } from "../../context/AnalysisContext";
 
 export default function SkillSpiderCard() {
-  const skills = ["Coding", "Design", "Communication", "Leadership", "Problem Solving", "Experience"];
+  const analysisContext = useAnalysis();
+  const analysisData = analysisContext?.analysisData || null;
+  
+  // Skills matching spider metrics: coding, design, experience, problem_solving, communication, leadership
+  const skills = ["Coding", "Design", "Experience", "Problem Solving", "Communication", "Leadership"];
   const cx = 100;
   const cy = 100;
   const outerRadius = 80;
+
+  // Extract spider metrics from analysis
+  const resumeSpider = analysisData?.analysis?.spider?.resume || {};
+  const jobSpider = analysisData?.analysis?.spider?.job || {};
+
+  // Map spider metrics to chart values (already 0-100 from Python)
+  const getResumeValues = () => {
+    if (!analysisData) return [0, 0, 0, 0, 0, 0];
+    
+    return [
+      resumeSpider.coding || 0,
+      resumeSpider.design || 0,
+      resumeSpider.experience || 0,
+      resumeSpider.problem_solving || 0,
+      resumeSpider.communication || 0,
+      resumeSpider.leadership || 0,
+    ];
+  };
+
+  const getJobValues = () => {
+    if (!analysisData) return [0, 0, 0, 0, 0, 0];
+    
+    return [
+      jobSpider.coding || 80,
+      jobSpider.design || 80,
+      jobSpider.experience || 80,
+      jobSpider.problem_solving || 80,
+      jobSpider.communication || 80,
+      jobSpider.leadership || 80,
+    ];
+  };
+
+  const resumeValues = getResumeValues();
+  const jobValues = getJobValues();
+
+  // Convert to radius values (0-80)
+  const resumeRadii = resumeValues.map(v => (v / 100) * outerRadius);
+  const jobRadii = jobValues.map(v => (v / 100) * outerRadius);
+
+  if (!analysisData) {
+    return (
+      <div className="bg-cardDark border border-cardStroke rounded-xl p-6 w-full h-full">
+        <div className="flex items-center gap-2 mb-6">
+          <img src={SkillGapAnalysis} alt="Skill Gap Analysis" className="w-6 h-6" />
+          <h3 className="font-sans text-[18px] font-semibold">Skill gap analysis</h3>
+        </div>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500 text-sm font-mono">Upload a resume to see skill gap analysis</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-cardDark border border-cardStroke rounded-xl p-6 w-full h-full">
@@ -70,7 +127,7 @@ export default function SkillSpiderCard() {
 
             {/* JOB REQUIREMENT (Purple) */}
             <polygon
-              points={polygonPoints(cx, cy, [75, 65, 80, 50, 70, 60].map(v => (v/100) * outerRadius))}
+              points={polygonPoints(cx, cy, jobRadii)}
               fill="rgba(168,85,247,0.2)"
               stroke="#a855f7"
               strokeWidth="2"
@@ -78,7 +135,7 @@ export default function SkillSpiderCard() {
 
             {/* YOUR PROFILE (Cyan) */}
             <polygon
-              points={polygonPoints(cx, cy, [85, 55, 70, 40, 90, 50].map(v => (v/100) * outerRadius))}
+              points={polygonPoints(cx, cy, resumeRadii)}
               fill="rgba(34,211,238,0.2)"
               stroke="#22d3ee"
               strokeWidth="2"
