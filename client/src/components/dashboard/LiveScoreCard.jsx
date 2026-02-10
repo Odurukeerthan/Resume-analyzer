@@ -1,6 +1,7 @@
 import ScoreRing from "../ScoreRing";
 import LiveScore from "../../assets/live-score.svg";
 import { useAnalysis } from "../../context/AnalysisContext";
+import AISuggestionsCard from "./AISuggestionsCard";
 
 export default function LiveScoreCard() {
   const analysisContext = useAnalysis();
@@ -81,6 +82,9 @@ export default function LiveScoreCard() {
         </div>
         <div />
       </div>
+
+      {/* AI Suggestions Section */}
+      <AISuggestionsCard />
     </div>
   );
 }

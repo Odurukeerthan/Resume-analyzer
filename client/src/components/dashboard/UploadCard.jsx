@@ -76,7 +76,7 @@ export default function UploadCard() {
 
       const uploadData = await uploadRes.json();
 
-      // Step 2: Analyze resume
+      // Step 2: Analyze resume (Python analysis only, no Gemini yet)
       const analysisRes = await apiRequest("/ai/analyze", {
         method: "POST",
         headers: {
@@ -84,12 +84,19 @@ export default function UploadCard() {
         },
         body: JSON.stringify({
           resumePath: uploadData.resume.absolutePath,
+          resumeId: uploadData.resume._id, // Pass resume ID to save analysis
           jobRole: jobTitle || jobRole || "Software Developer",
           jobDescription: jobDescription || "",
         }),
       });
 
-      setAnalysisData(analysisRes);
+      // Store resumeId and job info for later use
+      setAnalysisData({
+        ...analysisRes,
+        resumeId: uploadData.resume._id,
+        jobRole: jobTitle || jobRole || "Software Developer",
+        jobDescription: jobDescription || "",
+      });
       setError(null);
 
       // Reset form
