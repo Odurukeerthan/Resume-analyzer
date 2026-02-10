@@ -9,6 +9,15 @@ const resumeSchema = new mongoose.Schema(
     },
     fileName: String,
     filePath: String,
+    jobRole: String,
+    jobDescription: String,
+    // Analysis results (mixed type to allow flexible structure)
+    analysis: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+    suggestions: String, // Gemini suggestions
+    analyzedAt: Date,
     uploadedAt: {
       type: Date,
       default: Date.now,
