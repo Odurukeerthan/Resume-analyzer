@@ -30,3 +30,60 @@ export const uploadResume = async (req, res) => {
     },
   });
 };
+
+// Get recent scans for the authenticated user
+export const getRecentScans = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 4; // Default to 4 recent scans
+    
+    const scans = await Resume.find({ user: req.user._id })
+      .sort({ analyzedAt: -1, createdAt: -1 }) // Sort by analyzedAt first, then createdAt
+      .limit(limit)
+      .select("fileName analysis jobRole analyzedAt createdAt")
+      .lean();
+
+    // Format scans for frontend
+    const formattedScans = scans.map((scan) => {
+      const score = scan.analysis?.finalScore || scan.analysis?.live_scores?.overall || 0;
+      const timeAgo = formatTimeAgo(scan.analyzedAt || scan.createdAt);
+      
+      return {
+        id: scan._id.toString(),
+        name: scan.fileName || "Resume",
+        score: Math.round(score),
+        time: timeAgo,
+        jobRole: scan.jobRole || "Software Developer",
+        analyzedAt: scan.analyzedAt || scan.createdAt,
+      };
+    });
+
+    res.json({ scans: formattedScans });
+  } catch (error) {
+    console.error("Error fetching recent scans:", error);
+    res.status(500).json({ message: "Failed to fetch recent scans" });
+  }
+};
+
+// Helper function to format time ago
+function formatTimeAgo(date) {
+  if (!date) return "Unknown";
+  
+  const now = new Date();
+  const past = new Date(date);
+  const diffInSeconds = Math.floor((now - past) / 1000);
+
+  if (diffInSeconds < 60) {
+    return "Just now";
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  } else if (diffInSeconds < 604800) {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days} day${days > 1 ? "s" : ""} ago`;
+  } else {
+    return past.toLocaleDateString();
+  }
+}

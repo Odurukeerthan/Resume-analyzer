@@ -2,13 +2,14 @@ import { spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
 import { genAI } from "../utils/geminiClient.js";
+import Resume from "../models/Resume.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const analyzeResume = async (req, res) => {
   try {
-    const { resumePath, jobRole, jobDescription } = req.body;
+    const { resumePath, jobRole, jobDescription, resumeId } = req.body;
 
     if (!resumePath) {
       return res.status(400).json({ error: "Resume path is required" });
@@ -52,52 +53,176 @@ export const analyzeResume = async (req, res) => {
     });
 
     let output = "";
+    let errorOutput = "";
 
     python.stdout.on("data", (data) => {
       output += data.toString();
     });
 
     python.stderr.on("data", (err) => {
-      console.error("Python error:", err.toString());
+      const errorText = err.toString();
+      errorOutput += errorText;
+      console.error("Python stderr:", errorText);
     });
 
     python.on("close", async (code) => {
       console.log(`Python process exited with code ${code}`);
-      if (!output) {
-        return res.status(500).json({ error: "No output from AI service" });
+      console.log("Python stdout:", output);
+      console.log("Python stderr:", errorOutput);
+      
+      // Check if Python process failed
+      if (code !== 0) {
+        console.error(`Python process failed with exit code ${code}`);
+        return res.status(500).json({ 
+          error: "Python analysis failed",
+          details: errorOutput || `Process exited with code ${code}` 
+        });
+      }
+      
+      if (!output || output.trim() === "") {
+        console.error("No output from Python process");
+        return res.status(500).json({ 
+          error: "No output from AI service",
+          details: errorOutput || "Python process completed but produced no output"
+        });
       }
 
       let analysis;
       try {
-        analysis = JSON.parse(output);
+        // Try to parse JSON - Python outputs JSON to stdout
+        const cleanOutput = output.trim();
+        analysis = JSON.parse(cleanOutput);
+        console.log("Parsed analysis:", JSON.stringify(analysis, null, 2));
       } catch (e) {
         console.error("Invalid JSON from Python:", output);
-        return res.status(500).json({ error: "Invalid AI response" });
+        console.error("Parse error:", e.message);
+        return res.status(500).json({ 
+          error: "Invalid AI response",
+          details: `Failed to parse JSON: ${e.message}`,
+          rawOutput: output.substring(0, 500) // First 500 chars for debugging
+        });
       }
 
-      // 2️⃣ Gemini suggestions (NEW SDK)
-      const prompt = `
-You are a professional technical recruiter.
+      // Validate analysis has required fields
+      if (!analysis || typeof analysis !== 'object') {
+        console.error("Analysis is not a valid object:", analysis);
+        return res.status(500).json({ error: "Invalid analysis structure" });
+      }
 
-Role: ${jobRole}
-Match Score: ${analysis.finalScore}%
-Missing Skills: ${analysis.missingSkills.join(", ")}
+      // Ensure analysis has at least a finalScore or live_scores
+      if (!analysis.finalScore && !analysis.live_scores?.overall) {
+        console.error("Analysis missing score data:", analysis);
+        return res.status(500).json({ error: "Analysis missing required score data" });
+      }
 
-Give 3 concise resume improvement suggestions.
-`;
+      // Save analysis results to database immediately (without suggestions)
+      if (resumeId) {
+        try {
+          // Save the analysis object as-is (Python output structure)
+          const updateData = {
+            jobRole: jobRole || analysis.jobRole || "Software Developer",
+            jobDescription: jobDescription || "",
+            analysis: analysis, // Save the entire analysis object from Python
+            analyzedAt: new Date(),
+          };
 
-      const response = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
+          const updated = await Resume.findByIdAndUpdate(
+            resumeId,
+            updateData,
+            { new: true, runValidators: false } // Don't validate schema strictly
+          );
+          
+          if (updated) {
+            console.log("Analysis saved to database for resume:", resumeId);
+            console.log("Analysis keys:", Object.keys(analysis));
+          } else {
+            console.error("Failed to update resume:", resumeId);
+          }
+        } catch (dbError) {
+          console.error("Error saving analysis to database:", dbError);
+          console.error("DB Error details:", dbError.message);
+          console.error("DB Error stack:", dbError.stack);
+          // Continue even if DB save fails, but log the error
+        }
+      }
 
+      // Return analysis immediately without Gemini suggestions
       res.json({
         analysis,
-        suggestions: response.text,
+        resumeId: resumeId, // Return resumeId for frontend to request suggestions later
       });
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "AI processing failed" });
+  }
+};
+
+// Get AI suggestions for a resume (called separately when user clicks button)
+export const getAISuggestions = async (req, res) => {
+  try {
+    const { resumeId, jobRole, jobDescription, analysis } = req.body;
+
+    if (!resumeId) {
+      return res.status(400).json({ error: "Resume ID is required" });
+    }
+
+    if (!analysis) {
+      return res.status(400).json({ error: "Analysis data is required" });
+    }
+
+    // Generate Gemini suggestions
+    const prompt = `
+You are a professional technical recruiter.
+
+Role: ${jobRole || "Software Developer"}
+Match Score: ${analysis.finalScore || analysis.live_scores?.overall || 0}%
+Missing Skills: ${(analysis.missingSkills || []).join(", ")}
+
+Give 3 concise resume improvement suggestions.
+`;
+
+    let suggestions = "";
+    let error = null;
+
+    try {
+      const response = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+      suggestions = response.text;
+    } catch (geminiError) {
+      console.error("Gemini API error:", geminiError);
+      error = geminiError.message || "Unable to generate suggestions at this time. Please try again later.";
+      suggestions = "";
+    }
+
+    // Update resume with suggestions in database
+    try {
+      await Resume.findByIdAndUpdate(
+        resumeId,
+        {
+          suggestions: suggestions,
+        },
+        { new: true }
+      );
+    } catch (dbError) {
+      console.error("Error saving suggestions to database:", dbError);
+      // Continue even if DB save fails
+    }
+
+    if (error) {
+      return res.status(500).json({ 
+        error: error,
+        suggestions: "" 
+      });
+    }
+
+    res.json({
+      suggestions: suggestions,
+    });
+  } catch (err) {
+    console.error("Error generating AI suggestions:", err);
+    res.status(500).json({ error: "Failed to generate AI suggestions" });
   }
 };
