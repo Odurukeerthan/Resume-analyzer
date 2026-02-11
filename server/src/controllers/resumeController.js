@@ -87,3 +87,29 @@ function formatTimeAgo(date) {
     return past.toLocaleDateString();
   }
 }
+// Get score history for the graph (Last 6 scans, chronological)
+export const getScoreHistory = async (req, res) => {
+  try {
+    // 1. Fetch the 6 most recent scans
+    const scans = await Resume.find({ user: req.user._id })
+      .sort({ analyzedAt: -1 }) // Sort by newest first
+      .limit(6)
+      .select("analysis analyzedAt createdAt");
+
+    // 2. Reverse them to chronological order for the graph (Left to Right)
+    const history = scans.reverse().map((scan) => {
+      // Safely extract score (handle nested objects)
+      const score = scan.analysis?.finalScore || scan.analysis?.live_scores?.overall || 0;
+      
+      return {
+        score: Math.round(score),
+        date: scan.analyzedAt || scan.createdAt,
+      };
+    });
+
+    res.json(history);
+  } catch (error) {
+    console.error("Error fetching score history:", error);
+    res.status(500).json({ message: "Failed to fetch score history" });
+  }
+};

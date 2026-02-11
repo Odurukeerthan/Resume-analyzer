@@ -1,7 +1,7 @@
 import express from "express";
 import protect from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
-import { uploadResume, getRecentScans } from "../controllers/resumeController.js";
+import { uploadResume, getRecentScans,getScoreHistory } from "../controllers/resumeController.js";
 
 const router = express.Router();
 
@@ -13,5 +13,5 @@ router.post(
 );
 
 router.get("/recent", protect, getRecentScans);
-
+router.get("/history", protect, getScoreHistory);
 export default router;
