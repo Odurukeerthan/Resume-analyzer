@@ -11,8 +11,10 @@ export default function UploadCard() {
   const [jobDescription, setJobDescription] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
+
   const analysisContext = useAnalysis();
   const setAnalysisData = analysisContext?.setAnalysisData || (() => {});
+  const resetAnalysis = analysisContext?.resetAnalysis || (() => {}); // <--- Import this
   const setLoading = analysisContext?.setLoading || (() => {});
   const setError = analysisContext?.setError || (() => {});
   const error = analysisContext?.error || null;
@@ -51,9 +53,12 @@ export default function UploadCard() {
       return;
     }
 
+    // --- KEY FIX STARTS HERE ---
+    resetAnalysis(); // 1. Wipe the old score/suggestions immediately
     setUploading(true);
-    setLoading(true);
+    setLoading(true); // 2. Trigger loading state in UI
     setError(null);
+    // ---------------------------
 
     try {
       // Step 1: Upload file
@@ -76,7 +81,7 @@ export default function UploadCard() {
 
       const uploadData = await uploadRes.json();
 
-      // Step 2: Analyze resume (Python analysis only, no Gemini yet)
+      // Step 2: Analyze resume
       const analysisRes = await apiRequest("/ai/analyze", {
         method: "POST",
         headers: {
@@ -84,13 +89,12 @@ export default function UploadCard() {
         },
         body: JSON.stringify({
           resumePath: uploadData.resume.absolutePath,
-          resumeId: uploadData.resume._id, // Pass resume ID to save analysis
+          resumeId: uploadData.resume._id,
           jobRole: jobTitle || jobRole || "Software Developer",
           jobDescription: jobDescription || "",
         }),
       });
 
-      // Store resumeId and job info for later use
       setAnalysisData({
         ...analysisRes,
         resumeId: uploadData.resume._id,

@@ -2,6 +2,7 @@ import ScoreRing from "../ScoreRing";
 import LiveScore from "../../assets/live-score.svg";
 import { useAnalysis } from "../../context/AnalysisContext";
 import AISuggestionsCard from "./AISuggestionsCard";
+import { Loader2 } from "lucide-react"; // Or use any spinner you have
 
 export default function LiveScoreCard() {
   const analysisContext = useAnalysis();
@@ -20,7 +21,24 @@ export default function LiveScoreCard() {
     return "NEEDS WORK";
   };
 
-  if (!analysisData && !loading) {
+  // 1. LOADING STATE (The Fix: Show this while analyzing)
+  if (loading) {
+    return (
+      <div className="bg-cardDark rounded-xl border-r-4 border-neonPurple p-6 flex flex-col shadow-[0_0_10px_rgba(192,132,252,0.2),inset_-4px_0_5px_1px_rgba(192,132,252,0.1)] h-full">
+        <div className="flex items-center gap-2 w-full mb-2">
+          <img src={LiveScore} alt="Live Score" className="w-6 h-6" />
+          <h3 className="font-sans text-[18px] font-semibold">Live Score</h3>
+        </div>
+        <div className="flex flex-col items-center justify-center grow w-full py-4 space-y-3">
+          <Loader2 className="w-10 h-10 text-neonPurple animate-spin" />
+          <p className="text-gray-400 text-sm font-mono animate-pulse">Analyzing Resume...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. EMPTY STATE
+  if (!analysisData) {
     return (
       <div className="bg-cardDark rounded-xl border-r-4 border-neonPurple p-6 flex flex-col shadow-[0_0_10px_rgba(192,132,252,0.2),inset_-4px_0_5px_1px_rgba(192,132,252,0.1)] h-full">
         <div className="flex items-center gap-2 w-full mb-2">
@@ -34,6 +52,7 @@ export default function LiveScoreCard() {
     );
   }
 
+  // 3. RESULT STATE
   return (
     <div className="bg-cardDark rounded-xl border-r-4 border-neonPurple p-6 flex flex-col shadow-[0_0_10px_rgba(192,132,252,0.2),inset_-4px_0_5px_1px_rgba(192,132,252,0.1)] h-full">
       <div className="flex items-center gap-2 w-full mb-2">
@@ -48,12 +67,12 @@ export default function LiveScoreCard() {
           {getScoreLabel(overallScore)}
         </p>
       </div>
+      
       {/* METRICS */}
       <div className="w-full mt-4 space-y-3 text-sm">
         {/* KEYWORDS */}
         <div className="flex items-center gap-1">
           <span className="w-24 text-gray-400">Keywords</span>
-          <div className="flex items-center gap-3 w-1/4 ml-auto"></div>
           <div className="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-green-400"
@@ -64,12 +83,10 @@ export default function LiveScoreCard() {
             {keywordsScore}%
           </span>
         </div>
-        <div />
 
         {/* FORMATTING */}
         <div className="flex items-center gap-1">
           <span className="w-24 text-gray-400">Formatting</span>
-          <div className="flex items-center gap-3 w-1/4 ml-auto"></div>
           <div className="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-yellow-400"
@@ -80,7 +97,6 @@ export default function LiveScoreCard() {
             {formattingScore}%
           </span>
         </div>
-        <div />
       </div>
 
       {/* AI Suggestions Section */}
