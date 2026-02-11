@@ -1,8 +1,8 @@
 import { FileText, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom"; // Import Link
 import { apiRequest } from "../../utils/api";
 
-/* SAME LOGIC AS LIVE SCORE */
 const getScoreStyle = (score) =>
   score >= 80
     ? "bg-green-500/10 text-green-400 border-green-400/30"
@@ -13,7 +13,6 @@ const getScoreStyle = (score) =>
 export default function RecentScans() {
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     const fetchRecentScans = async () => {
@@ -32,18 +31,23 @@ export default function RecentScans() {
     fetchRecentScans();
   }, []);
 
+  // Function to scroll to the top of the dashboard
+  const handleUploadClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <div className="space-y-4 relative">
+    <div className="space-y-4 relative mb-8">
       
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Recent Scans</h3>
-        <a
-          href="/scans"
+        <Link
+          to="/scans"
           className="text-sm text-neonCyan hover:underline"
         >
           View All →
-        </a>
+        </Link>
       </div>
 
       {/* CARDS */}
@@ -63,7 +67,6 @@ export default function RecentScans() {
               className="relative bg-cardDark border border-cardStroke rounded-xl p-4
                          hover:border-neonCyan/40 transition group cursor-pointer"
             >
-              {/* TOP ROW */}
               <div className="flex items-start justify-between">
                 <div className="w-9 h-9 flex items-center justify-center rounded-md bg-gray-800">
                   <FileText size={18} className="text-gray-400" />
@@ -78,17 +81,14 @@ export default function RecentScans() {
                 </span>
               </div>
 
-              {/* FILE NAME */}
               <div className="block mt-4 font-medium truncate group-hover:text-neonCyan transition">
                 {scan.name}
               </div>
 
-              {/* JOB ROLE */}
               {scan.jobRole && (
                 <p className="text-xs text-gray-500 mt-1 truncate">{scan.jobRole}</p>
               )}
 
-              {/* TIME */}
               <p className="text-xs text-gray-400 mt-1">{scan.time}</p>
             </div>
           ))
@@ -96,33 +96,21 @@ export default function RecentScans() {
 
         {/* UPLOAD NEW CARD */}
         <div
+          onClick={handleUploadClick}
           className="flex items-center justify-center bg-cardDark border border-dashed
                      border-cardStroke rounded-xl cursor-pointer
-                     hover:border-neonCyan/40 transition"
+                     hover:border-neonCyan/40 hover:bg-slate-800/30 transition h-full min-h-35"
         >
           <div className="text-center text-gray-400">
             <div className="w-12 h-12 mx-auto flex items-center justify-center
-                            rounded-full bg-gray-800 mb-2">
+                          rounded-full bg-gray-800 mb-2 group-hover:bg-gray-700">
               <Plus />
             </div>
-            Upload New
+            <span className="text-sm font-medium">Upload New</span>
           </div>
         </div>
 
       </div>
-
-      {/* HOVER PREVIEW */}
-      {previewUrl && (
-        <div className="fixed right-6 bottom-6 z-50 w-48 h-64
-                        bg-black border border-cardStroke rounded-lg
-                        overflow-hidden shadow-xl">
-          <iframe
-            src={previewUrl}
-            title="Preview"
-            className="w-full h-full"
-          />
-        </div>
-      )}
     </div>
   );
 }

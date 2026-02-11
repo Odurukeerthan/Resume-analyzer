@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import ScansPage from "./pages/ScansPage";
 import VerifyEmail from "./pages/VerifyEmail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AnalysisProvider } from "./context/AnalysisContext";
@@ -20,6 +21,14 @@ export default function App() {
                   <ErrorBoundary>
                     <Dashboard />
                   </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/scans"
+              element={
+                <ProtectedRoute>
+                  <ScansPage />
                 </ProtectedRoute>
               }
             />
